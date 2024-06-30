@@ -17,8 +17,9 @@ class ElevatorGenerator
 			if (path == null) return;
 
 			// Make the image
+			status = "Generating image rn...";
 			Generate(path);
-			status = "File generated!";
+			status = "Done!";
 		}
 	}
 
@@ -60,10 +61,8 @@ class ElevatorGenerator
 		// Turn the image into a vtf file
 		texturePath = ConvertToVtf(texturePath);
 
-		//! temp
-		// TODO: Remove
-		//! not good bruh
-		string steamGamesFolderPath = @"D:\games\steam\steamapps\common";
+		// Get the folders and whatnot
+		string steamGamesFolderPath = Program.SteamPath;
 		string portalFolder = Path.Join(steamGamesFolderPath, @"Portal\portal\");
 
 		// Make the file structure for the actual thing
@@ -71,7 +70,7 @@ class ElevatorGenerator
 		if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
 
 		// Put the vtf file in it
-		File.Move(texturePath, Path.Join(fullPath, "round_elevator_sheet_3.vtf"));
+		File.Move(texturePath, Path.Join(fullPath, "round_elevator_sheet_3.vtf"), true);
 	}
 
 	private static string GenerateImage(string overlayPath)
@@ -120,10 +119,8 @@ class ElevatorGenerator
 
 	private static string ConvertToVtf(string filePath)
 	{
-		//! temp
-		// TODO: Remove
-		//! not good bruh
-		string pathToVtfCmd = @"C:\Users\max\Downloads\vtflib132-bin\bin\x64\VTFCmd.exe";
+		//! Maybe don't do this
+		string pathToVtfCmd = @"./lib/VTFCmd.exe";
 
 		// Make the process
 		ProcessStartInfo processStartInfo = new ProcessStartInfo()
