@@ -5,12 +5,12 @@
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>custom_portal_gun_maker</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Raylib-cs" Version="6.1.1" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4" />
+    <PackageReference Include="TinyDialogsNet" Version="2.0.0" />
   </ItemGroup>
 
 </Project>

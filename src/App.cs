@@ -1,4 +1,5 @@
 using Raylib_cs;
+using TinyDialogsNet;
 
 class App
 {
@@ -18,12 +19,12 @@ class App
 
 	private static void Start()
 	{
-		ElevatorGenerator.Test();
+
 	}
 
 	private static void Update()
 	{
-
+		ElevatorGenerator.Update();
 	}
 
 	private static void Render()
