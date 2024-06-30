@@ -32,7 +32,7 @@ class App
 		Raylib.BeginDrawing();
 		Raylib.ClearBackground(Color.Magenta);
 
-		Raylib.DrawText("elevator", 10, 10, 30, Color.White);
+		ElevatorGenerator.Render();
 
 		Raylib.EndDrawing();
 	}
