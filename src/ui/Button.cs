@@ -6,6 +6,7 @@ class Button
 	public Rectangle Rectangle;
 	public Action OnClick;
 	public bool Suicidal;
+	public bool Disabled;
 
 	private Texture2D image;
 	private bool scheduledForDeath;
@@ -25,6 +26,9 @@ class Button
 
 	public void Update()
 	{
+		// Do nothing if we're disabled
+		if (Disabled) return;
+
 		// Check for if the mouse is hovering over
 		Vector2 mousePosition = Raylib.GetMousePosition();
 		bool currentlyHovering = Raylib.CheckCollisionPointRec(mousePosition, Rectangle);
@@ -48,13 +52,19 @@ class Button
 		// because the image has already been unloaded
 		if (scheduledForDeath) return;
 
+		// If we're disabled then draw a semi transparent
+		// gray cube thingy over the image so that it
+		// looks kinda grayed out
+		Color color = Disabled ? new Color(128, 128, 128, 128) : Color.White;
+
 		// Draw the texture
 		Raylib.DrawTexturePro(
 			image,
 			new Rectangle(0, 0, image.Width, image.Height),
 			Rectangle,
-			Vector2.Zero, 0f, Color.White
+			Vector2.Zero, 0f, color
 		);
+
 	}
 
 	public void CleanUp()
