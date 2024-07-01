@@ -1,8 +1,9 @@
 using Raylib_cs;
-using TinyDialogsNet;
 
 class App
 {
+	public static Scene Scene;
+
 	public static void Run()
 	{
 		Raylib.SetTraceLogLevel(TraceLogLevel.Warning);
@@ -19,12 +20,13 @@ class App
 
 	private static void Start()
 	{
-
+		Scene = new MainMenu();
+		Scene.Start();
 	}
 
 	private static void Update()
 	{
-		ElevatorGenerator.Update();
+		Scene.Update();
 	}
 
 	private static void Render()
@@ -32,13 +34,25 @@ class App
 		Raylib.BeginDrawing();
 		Raylib.ClearBackground(Color.Magenta);
 
-		ElevatorGenerator.Render();
+		Scene.Render();
 
 		Raylib.EndDrawing();
 	}
 
 	private static void CleanUp()
 	{
+		Scene.CleanUp();
 		Raylib.CloseWindow();
+	}
+
+
+	public static void SetScene(Scene newScene)
+	{
+		// Unload the previous scene
+		Scene.CleanUp();
+
+		// Load and assign the new scene
+		Scene = newScene;
+		Scene.Start();
 	}
 }

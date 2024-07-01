@@ -1,19 +1,17 @@
-using System.Diagnostics;
 using System.Numerics;
 using Raylib_cs;
-using TinyDialogsNet;
 
-class ElevatorGenerator
+class ElevatorGenerator : Scene
 {
 	private static string status = "Press ctrl+o to select the file";
 
-	public static void Update()
+	public override void Update()
 	{
 		// Check for if they do ctrl+o
 		if (Raylib.IsKeyDown(KeyboardKey.LeftControl) && Raylib.IsKeyDown(KeyboardKey.O))
 		{
 			// Get the path
-			string path = OpenFileDialogue();
+			string path = OpenFileDialogueGetImage("Elevator image");
 			if (path == null) return;
 
 			// Make the image
@@ -23,43 +21,20 @@ class ElevatorGenerator
 		}
 	}
 
-	public static void Render()
+	public override void Render()
 	{
 		Raylib.DrawText(status, 10, 10, 30, Color.White);
 	}
 
-	private static string OpenFileDialogue()
-	{
-		// Specify the files that we want to accept,
-		// and also get the path to the default picture
-		// folder on the persons computer
-		FileFilter filter = new FileFilter("png image", ["*.png"]);
-		string picturesFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures) + "/";
-
-		// TODO: Don't use var (stink)
-		// Get the files
-		var (cancelled, paths) = TinyDialogs.OpenFileDialog("Elevator image", picturesFolder, false, filter);
-		if (cancelled || paths == null) return null;
-
-		// Stupid enumerator thingy bruh tf even is this
-		// (tf wrong with normal string fr)
-		using (IEnumerator<string> enumerator = paths.GetEnumerator())
-		{
-			if (enumerator.MoveNext()) return enumerator.Current;
-		}
-
-		// No path or something idk
-		return null;
-	}
-
-	private static void Generate(string overlayPath)
+	private void Generate(string overlayPath)
 	{
 		// Generate and save the image to a temporary
 		// file somewhere
 		string texturePath = GenerateImage(overlayPath);
 
 		// Turn the image into a vtf file
-		texturePath = ConvertToVtf(texturePath);
+		string textureFileName = "round_elevator_sheet_3.vtf";
+		texturePath = ConvertToVtf(texturePath, textureFileName);
 
 		// Get the folders and whatnot
 		string steamGamesFolderPath = Program.SteamPath;
@@ -70,7 +45,7 @@ class ElevatorGenerator
 		if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
 
 		// Put the vtf file in it
-		File.Move(texturePath, Path.Join(fullPath, "round_elevator_sheet_3.vtf"), true);
+		File.Move(texturePath, Path.Join(fullPath, textureFileName), true);
 	}
 
 	private static string GenerateImage(string overlayPath)
@@ -115,43 +90,5 @@ class ElevatorGenerator
 
 		// Return the path to the file
 		return filePath;
-	}
-
-	private static string ConvertToVtf(string filePath)
-	{
-		//! Maybe don't do this
-		string pathToVtfCmd = @"./lib/VTFCmd.exe";
-
-		// Make the process
-		ProcessStartInfo processStartInfo = new ProcessStartInfo()
-		{
-			FileName = pathToVtfCmd,
-			Arguments = $"-file {filePath} -resize -exportFormat \"vtf\"",
-			CreateNoWindow = true,
-			UseShellExecute = false
-		};
-
-		// Run the process to convert the file
-		using (Process process = new Process())
-		{
-			// Set the process, then start it
-			process.StartInfo = processStartInfo;
-			process.Start();
-
-			// Wait for it to fully run (convert the file)
-			process.WaitForExit();
-		}
-
-		// Once the file has been generated, we
-		// can delete the old png input file
-		File.Delete(filePath);
-
-		// Rename the file to have the correct name
-		string newFileName = Path.Join(Path.GetDirectoryName(filePath), "round_elevator_sheet_3.vtf");
-		filePath = filePath.Replace(".png", ".vtf");
-		File.Move(filePath, newFileName, true);
-		
-		// Give back the new path to the vtf image
-		return newFileName;
 	}
 }
