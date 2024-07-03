@@ -5,6 +5,7 @@ class LayerHandler
 {
 	public List <Layer> Layers { get; set; }
 	public int SelectedIndex { get; set; }
+	public bool Debug { get; set; }
 
 	public LayerHandler()
 	{
@@ -12,6 +13,27 @@ class LayerHandler
 		// TODO: Don't use -1 (make unsigned (faster))
 		Layers = new List<Layer>();
 		SelectedIndex = -1;
+	}
+
+	// Check for if a layer is being selected (clicked on)
+	public void GetSelectedLayer()
+	{
+		// Check for if the user is clicking
+		if (Raylib.IsMouseButtonPressed(MouseButton.Left) == false) return;
+
+		// Check for if the users mouse is over a layer
+		Vector2 mousePosition = Raylib.GetMousePosition();
+		int selectedLayerIndex = 0;
+		foreach (Layer layer in Layers)
+		{
+			// If the layer can be selected then add the index
+			// to a list of indexes so that we can figure
+			// out what the top one was selected
+			if (!Raylib.CheckCollisionPointRec(mousePosition, layer.GetRectangle())) continue;
+			if (layer.Index > selectedLayerIndex) selectedLayerIndex = layer.Index;
+		}
+
+		SelectedIndex = selectedLayerIndex;
 	}
 
 	// Draw the layers and include stuff like
@@ -23,11 +45,10 @@ class LayerHandler
 		{
 			// Draw the layer
 			// TODO: Don't reuse code
-			Vector2 size = new Vector2(layer.Texture.Width, layer.Texture.Height);
 			Raylib.DrawTexturePro(
 				layer.Texture,
-				new Rectangle(Vector2.Zero, size),
-				new Rectangle(layer.Position, size * layer.Scale),
+				new Rectangle(Vector2.Zero, new Vector2(layer.Texture.Width, layer.Texture.Height)),
+				layer.GetRectangle(),
 				Vector2.Zero,
 				layer.Rotation,
 				Color.White
@@ -43,7 +64,7 @@ class LayerHandler
 				Color backgroundColor = Color.White;
 
 				// Draw a border thingy around it
-				Raylib.DrawRectangleLinesEx(new Rectangle(layer.Position, size * layer.Scale), lineThickness, lineColor);
+				Raylib.DrawRectangleLinesEx(layer.GetRectangle(), lineThickness, lineColor);
 
 				// Draw all of the transform control box
 				// things on each corner of the image
@@ -55,7 +76,15 @@ class LayerHandler
 					Raylib.DrawRectangleLinesEx(control, lineThickness, lineColor);
 				}
 			}
-			
+		
+			// Draw the layer index in the top corner 
+			// and a little border around it (debug only)
+			if (Debug)
+			{
+				Rectangle rectangle = layer.GetRectangle();
+				Raylib.DrawRectangleLinesEx(rectangle, 1f, Color.Red);
+				Raylib.DrawText($"{layer.Index}", (int)(layer.Position.X + (rectangle.Width / 2)), (int)(layer.Position.Y + (rectangle.Height / 2)), 20, Color.White);
+			}
 		}
 	}
 
@@ -68,11 +97,10 @@ class LayerHandler
 		{
 			// Draw the layer
 			// TODO: Don't reuse code
-			Vector2 size = new Vector2(layer.Texture.Width, layer.Texture.Height);
 			Raylib.DrawTexturePro(
 				layer.Texture,
-				new Rectangle(Vector2.Zero, size),
-				new Rectangle(layer.Position, size * layer.Scale),
+				new Rectangle(Vector2.Zero, new Vector2(layer.Texture.Width, layer.Texture.Height)),
+				layer.GetRectangle(),
 				Vector2.Zero,
 				layer.Rotation,
 				Color.White
@@ -80,12 +108,15 @@ class LayerHandler
 		}
 	}
 
+	// Get rid of all the rubbish
 	public void CleanUp()
 	{
 		// Unload all of the layer textures
 		Layers.ForEach(layer => Raylib.UnloadTexture(layer.Texture));
 	}
 }
+
+
 
 class Layer
 {
@@ -94,6 +125,11 @@ class Layer
 	public float Rotation;
 	public Vector2 Scale;
 	public int Index;
+
+	public Rectangle GetRectangle()
+	{
+		return new Rectangle(Position, new Vector2(Texture.Width, Texture.Height) * Scale);
+	}
 
 	public Rectangle[] GetTransformControls()
 	{

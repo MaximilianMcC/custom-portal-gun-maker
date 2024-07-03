@@ -10,6 +10,7 @@ class P1PortalgunGenerator : Scene
 	{
 		// Make the layers setup stuff
 		layerHandler = new LayerHandler();
+		layerHandler.Debug = true;
 
 		// Load in the portalgun texture
 		portalGunTexture = Raylib.LoadTexture("./assets/game/p1gun/v_portalgun.png");
@@ -18,6 +19,7 @@ class P1PortalgunGenerator : Scene
 	public override void Update()
 	{
 		
+		layerHandler.GetSelectedLayer();
 
 
 		// If we press ctrl+n make a new layer
@@ -39,6 +41,7 @@ class P1PortalgunGenerator : Scene
 				Index = layerHandler.Layers.Count
 			};
 			layerHandler.Layers.Add(layer);
+			Console.WriteLine("added layer " + layer.Index);
 
 			// Select the new layer
 			layerHandler.SelectedIndex = layer.Index;
