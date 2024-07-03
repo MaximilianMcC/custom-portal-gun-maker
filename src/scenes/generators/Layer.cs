@@ -3,9 +3,14 @@ using Raylib_cs;
 
 class LayerHandler
 {
+	public bool Debug { get; set; }
+
 	public List <Layer> Layers { get; set; }
 	public int SelectedIndex { get; set; }
-	public bool Debug { get; set; }
+
+	private bool dragging;
+
+
 
 	public LayerHandler()
 	{
@@ -16,24 +21,67 @@ class LayerHandler
 	}
 
 	// Check for if a layer is being selected (clicked on)
+	// TODO: Also make work for the layer view thing on the side
 	public void GetSelectedLayer()
 	{
-		// Check for if the user is clicking
+		// Check for if bro is clicking
 		if (Raylib.IsMouseButtonPressed(MouseButton.Left) == false) return;
+		Vector2 mousePosition = Raylib.GetMousePosition();
 
 		// Check for if the users mouse is over a layer
-		Vector2 mousePosition = Raylib.GetMousePosition();
-		int selectedLayerIndex = 0;
+		int selectedLayerIndex = -1;
 		foreach (Layer layer in Layers)
 		{
-			// If the layer can be selected then add the index
-			// to a list of indexes so that we can figure
-			// out what the top one was selected
+			// If the layer can be selected then check
+			// for if its above the previously selected
+			// one (we only wanna select the top one)
 			if (!Raylib.CheckCollisionPointRec(mousePosition, layer.GetRectangle())) continue;
 			if (layer.Index > selectedLayerIndex) selectedLayerIndex = layer.Index;
 		}
 
+		// Select the layer
 		SelectedIndex = selectedLayerIndex;
+	}
+
+	// Check for if the user wants to move the currently selected layer
+	public void DragSelectedLayer()
+	{
+		// TODO: Don't do this
+		//! bad
+		if (SelectedIndex == -1) return;
+
+		// Check for if the user is holding down on something
+		if (Raylib.IsMouseButtonDown(MouseButton.Left) == false)
+		{
+			// Stop dragging and exit early
+			dragging = false;
+			return;
+		}
+
+		// Check for if the user is holding down
+		// on the selected layer
+		Vector2 mousePosition = Raylib.GetMousePosition();
+		if (!Raylib.CheckCollisionPointRec(mousePosition, Layers[SelectedIndex].GetRectangle())) return;
+		if (dragging == false) dragging = true;
+
+		// Get the distance that the mouse has moved
+		// since the last time we moved it and add
+		// it to the position of the layer so that
+		// it follows the mouse
+		Vector2 offset = Raylib.GetMouseDelta();
+		Layers[SelectedIndex].Position += offset;
+	}
+
+	// Check for if the user wants to resize the currently selected layer
+	public void ResizeSelectedLayer()
+	{
+
+	}
+
+	// Check for if the user wants to rotate the currently selected layer
+	public void RotateSelectedLayer()
+	{
+
 	}
 
 	// Draw the layers and include stuff like
@@ -89,7 +137,7 @@ class LayerHandler
 	}
 
 	// Draw layers but with nothing else.
-	// final stuff used for baking and whatnot
+	// final stuff used for baking 
 	public void DrawLayers()
 	{
 		// Loop over every layer

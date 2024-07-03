@@ -21,6 +21,10 @@ class P1PortalgunGenerator : Scene
 		
 		layerHandler.GetSelectedLayer();
 
+		layerHandler.DragSelectedLayer();
+		layerHandler.ResizeSelectedLayer();
+		layerHandler.RotateSelectedLayer();
+
 
 		// If we press ctrl+n make a new layer
 		if (Raylib.IsKeyDown(KeyboardKey.LeftControl) && Raylib.IsKeyDown(KeyboardKey.N))
@@ -41,7 +45,6 @@ class P1PortalgunGenerator : Scene
 				Index = layerHandler.Layers.Count
 			};
 			layerHandler.Layers.Add(layer);
-			Console.WriteLine("added layer " + layer.Index);
 
 			// Select the new layer
 			layerHandler.SelectedIndex = layer.Index;
