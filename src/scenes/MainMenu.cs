@@ -17,12 +17,12 @@ class MainMenu : Scene
 		float y = (Raylib.GetScreenHeight() - buttonSizes.Y) / 3;
 
 		// Make the menu buttons
-		portal1GunButton = new Button("./assets/ui/button-p1-gun.png", new Rectangle(xOffset, y, buttonSizes), (() => App.SetScene(new Portal1PortalGunGenerator())), true);
+		portal1GunButton = new Button("./assets/ui/button-p1-gun.png", new Rectangle(xOffset, y, buttonSizes), (() => App.SetScene(new P1PortalgunGenerator())), true);
 		elevatorButton = new Button("./assets/ui/button-p1-elevator.png", new Rectangle(xOffset + buttonSizes.X, y, buttonSizes), (() => App.SetScene(new ElevatorGenerator())), true);
-		portal2GunButton = new Button("./assets/ui/button-p2-gun.png", new Rectangle(xOffset + (buttonSizes.X * 2), y, buttonSizes), (() => App.SetScene(new Portal1PortalGunGenerator())), true);
+		portal2GunButton = new Button("./assets/ui/button-p2-gun.png", new Rectangle(xOffset + (buttonSizes.X * 2), y, buttonSizes), (() => App.SetScene(new P1PortalgunGenerator())), true);
 
 		// TODO: Make other generators
-		portal1GunButton.Disabled = true;
+		// portal1GunButton.Disabled = true;
 		portal2GunButton.Disabled = true;
 	}
 

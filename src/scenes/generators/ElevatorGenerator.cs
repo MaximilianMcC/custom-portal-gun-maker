@@ -52,7 +52,7 @@ class ElevatorGenerator : Scene
 	{
 		// Load in the elevator image, and the image
 		// that we want to put on the elevator
-		Texture2D elevatorTexture = Raylib.LoadTexture("./assets/game/round_elevator_sheet_3.png");
+		Texture2D elevatorTexture = Raylib.LoadTexture("./assets/game/elevator/round_elevator_sheet_3.png");
 		Texture2D overlayTexture = Raylib.LoadTexture(overlayPath);
 
 		// Make a new render texture so that we can

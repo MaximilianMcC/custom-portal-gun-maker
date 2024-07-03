@@ -1,7 +1,7 @@
 using System.Numerics;
 using Raylib_cs;
 
-class Portal1PortalGunGenerator : Scene
+class P1PortalgunGenerator : Scene
 {
 	private Texture2D portalGunTexture;
 	private List<Layer> layers;
@@ -13,27 +13,14 @@ class Portal1PortalGunGenerator : Scene
 		layers = new List<Layer>();
 		selectedLayerIndex = 0;
 
-		// Load in the portal gun texture
-		portalGunTexture = Raylib.LoadTexture("./assets/game/temp.png");
+		// Load in the portalgun texture
+		portalGunTexture = Raylib.LoadTexture("./assets/game/p1gun/v_portalgun.png");
 	}
 
 	public override void Update()
 	{
-		// Check for if the user wants to select a
-		// layer by clicking on it on the preview,
-		// or by clicking on it in the layers panel
-		if (Raylib.IsMouseButtonPressed(MouseButton.Left))
-		{
-			// Check for if any layers in the preview were clicked
-			Vector2 mouseCoordinates = Raylib.GetMousePosition();
-			foreach (Layer layer in layers)
-			{
-				// If we're clicking on one of them, then assign
-				// the index thingy thing idk
-				if (!Raylib.CheckCollisionPointRec(mouseCoordinates, new Rectangle(layer.Position, (layer.Texture.Width * layer.Scale.X), (layer.Texture.Width * layer.Scale.Y)))) return;
-				selectedLayerIndex = layer.layerIndex;
-			}
-		}
+		
+
 
 		// If we press ctrl+n make a new layer
 		if (Raylib.IsKeyDown(KeyboardKey.LeftControl) && Raylib.IsKeyDown(KeyboardKey.N))
@@ -47,7 +34,8 @@ class Portal1PortalGunGenerator : Scene
 			Layer layer = new Layer()
 			{
 				Texture = Raylib.LoadTexture(path),
-				Position = Vector2.Zero,
+				// Position = Vector2.Zero,
+				Position = new Vector2(25f),
 				Rotation = 0f,
 				Scale = Vector2.One,
 				layerIndex = layers.Count
@@ -88,30 +76,14 @@ class Portal1PortalGunGenerator : Scene
 				if (i != selectedLayerIndex) continue;
 
 				// Draw the main box around it
-				Raylib.DrawRectangleLinesEx(new Rectangle(layer.Position, size), 2f, Color.Red);
+				Raylib.DrawRectangleLinesEx(new Rectangle(layer.Position, size), 2f, Color.Magenta);
 
 				// Draw the four transform controls
-				int resizeBoxSize = 15;
-
-				// Top left
-				Rectangle rectangle = new Rectangle(layer.Position.X - (resizeBoxSize / 2), layer.Position.Y - (resizeBoxSize / 2), resizeBoxSize, resizeBoxSize);
-				Raylib.DrawRectangleRec(rectangle, Color.White);
-				Raylib.DrawRectangleLinesEx(rectangle, 2f, Color.Red);
-
-				// Bottom left or something
-				rectangle = new Rectangle((layer.Position.X - (resizeBoxSize / 2) + layer.Texture.Width * layer.Scale.X), layer.Position.Y - (resizeBoxSize / 2) + layer.Texture.Height * layer.Scale.Y, resizeBoxSize, resizeBoxSize);
-				Raylib.DrawRectangleRec(rectangle, Color.White);
-				Raylib.DrawRectangleLinesEx(rectangle, 2f, Color.Red);
-
-				// idk bruh I forgot
-				rectangle = new Rectangle(layer.Position.X - (resizeBoxSize / 2), layer.Position.Y - (resizeBoxSize / 2) + layer.Texture.Height * layer.Scale.Y, resizeBoxSize, resizeBoxSize);
-				Raylib.DrawRectangleRec(rectangle, Color.White);
-				Raylib.DrawRectangleLinesEx(rectangle, 2f, Color.Red);
-
-				// forgot again sorry
-				rectangle = new Rectangle(layer.Position.X - (resizeBoxSize / 2) + layer.Texture.Width * layer.Scale.X, layer.Position.Y - (resizeBoxSize / 2), resizeBoxSize, resizeBoxSize);
-				Raylib.DrawRectangleRec(rectangle, Color.White);
-				Raylib.DrawRectangleLinesEx(rectangle, 2f, Color.Red);
+				foreach (Rectangle transformControl in layer.GetTransformControls())
+				{
+					Raylib.DrawRectangleRec(transformControl, Color.White);
+					Raylib.DrawRectangleLinesEx(transformControl, 2f, Color.Magenta);
+				}
 			}
 		}
 
@@ -119,7 +91,7 @@ class Portal1PortalGunGenerator : Scene
 		{
 			// Dimension things
 			int layerPanelWidth = 150;
-			int layerPanelX = (Raylib.GetScreenWidth() / 2) - layerPanelWidth;
+			int layerPanelX = Raylib.GetScreenWidth() - layerPanelWidth;
 			int x = layerPanelX;
 			int y = 10;
 
@@ -154,21 +126,12 @@ class Portal1PortalGunGenerator : Scene
 		}
 	}
 
+
+
 	public override void CleanUp()
 	{
 		// Unload all the textures
 		Raylib.UnloadTexture(portalGunTexture);
 		layers.ForEach(layer => Raylib.UnloadTexture(layer.Texture));
 	}
-}
-
-
-
-struct Layer
-{
-	public Texture2D Texture;
-	public Vector2 Position;
-	public float Rotation;
-	public Vector2 Scale;
-	public int layerIndex;
 }
