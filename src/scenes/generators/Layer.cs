@@ -8,9 +8,6 @@ class LayerHandler
 	public List <Layer> Layers { get; set; }
 	public int SelectedIndex { get; set; }
 
-	private bool dragging;
-
-
 
 	public LayerHandler()
 	{
@@ -26,48 +23,49 @@ class LayerHandler
 	{
 		// Check for if bro is clicking
 		if (Raylib.IsMouseButtonPressed(MouseButton.Left) == false) return;
-		Vector2 mousePosition = Raylib.GetMousePosition();
-
-		// Check for if the users mouse is over a layer
+		
+		// Loop over every layer
+		// TODO: Don't use -1
 		int selectedLayerIndex = -1;
 		foreach (Layer layer in Layers)
 		{
-			// If the layer can be selected then check
-			// for if its above the previously selected
-			// one (we only wanna select the top one)
-			if (!Raylib.CheckCollisionPointRec(mousePosition, layer.GetRectangle())) continue;
-			if (layer.Index > selectedLayerIndex) selectedLayerIndex = layer.Index;
+			// Check for if the mouse is over it
+			if (layer.MouseOnBody() || layer.MouseOnTransformControl(out _))
+			{
+				// Check for if the current layer is above the previously
+				// selected layer. We only want to select the highest layer
+				if (layer.Index > selectedLayerIndex) selectedLayerIndex = layer.Index;
+			}
 		}
 
 		// Select the layer
 		SelectedIndex = selectedLayerIndex;
 	}
 
-	// Check for if the user wants to move the currently selected layer
-	public void DragSelectedLayer()
+	public void TransformSelectedLayer()
 	{
 		// TODO: Don't do this
 		//! bad
 		if (SelectedIndex == -1) return;
 
 		// Check for if the user is holding down on something
-		if (Raylib.IsMouseButtonDown(MouseButton.Left) == false)
-		{
-			// Stop dragging and exit early
-			dragging = false;
-			return;
-		}
+		if (Raylib.IsMouseButtonDown(MouseButton.Left) == false) return;
+	}
+
+	// Check for if the user wants to move the currently selected layer
+	public void DragSelectedLayer()
+	{
+
+
+
 
 		// Check for if the user is holding down
 		// on the selected layer
-		Vector2 mousePosition = Raylib.GetMousePosition();
-		if (!Raylib.CheckCollisionPointRec(mousePosition, Layers[SelectedIndex].GetRectangle())) return;
-		if (dragging == false) dragging = true;
 
 		// Get the distance that the mouse has moved
 		// since the last time we moved it and add
 		// it to the position of the layer so that
-		// it follows the mouse
+		// it follows the mouse (dragging)
 		Vector2 offset = Raylib.GetMouseDelta();
 		Layers[SelectedIndex].Position += offset;
 	}
@@ -75,7 +73,23 @@ class LayerHandler
 	// Check for if the user wants to resize the currently selected layer
 	public void ResizeSelectedLayer()
 	{
+		// TODO: Don't do this
+		//! bad
+		if (SelectedIndex == -1) return;
 
+		// Check for if the user is holding down on something
+		if (Raylib.IsMouseButtonDown(MouseButton.Left) == false) return;
+
+		// Check for if the user is holding down on one
+		// of the transform controls of the selected layer,
+		// and if so what one they are holding down on
+		// TODO: Use a bigger hitbox for the controls
+		Vector2 mousePosition = Raylib.GetMousePosition();
+		Rectangle[] transformControls = Layers[SelectedIndex].GetTransformControls();
+		if (Raylib.CheckCollisionPointRec(mousePosition, transformControls[0])) return;
+		if (Raylib.CheckCollisionPointRec(mousePosition, transformControls[1])) return;
+		if (Raylib.CheckCollisionPointRec(mousePosition, transformControls[2])) return;
+		if (Raylib.CheckCollisionPointRec(mousePosition, transformControls[3])) return;
 	}
 
 	// Check for if the user wants to rotate the currently selected layer
@@ -174,15 +188,17 @@ class Layer
 	public Vector2 Scale;
 	public int Index;
 
+	// Get the body's rectangle
 	public Rectangle GetRectangle()
 	{
 		return new Rectangle(Position, new Vector2(Texture.Width, Texture.Height) * Scale);
 	}
 
+	// Get the rectangles of all transform controls
 	public Rectangle[] GetTransformControls()
 	{
 		// Precalculate this thingy
-		Vector2 resizeBoxSize = new Vector2(15f);
+		Vector2 resizeBoxSize = new Vector2(16f);
 		Vector2 resizeBoxOffset = resizeBoxSize / 2;
 
         // Precalculate the y positions
@@ -202,5 +218,40 @@ class Layer
 			new Rectangle(bottom + left, resizeBoxSize),
 			new Rectangle(bottom + right, resizeBoxSize),
 		};
+	}
+
+	// Check for if the mouse is hovering over the
+	// body of this layer
+	public bool MouseOnBody()
+	{
+		// Get the mouse position
+		Vector2 mousePosition = Raylib.GetMousePosition();
+
+		// Check for collision
+		return Raylib.CheckCollisionPointRec(mousePosition, GetRectangle());
+	}
+
+	// Check for if the mouse is hovering over a
+	// transform control of this layer
+	public bool MouseOnTransformControl(out int? controlIndex)
+	{
+		// Get the mouse position
+		Vector2 mousePosition = Raylib.GetMousePosition();
+
+		// Get all of the controls then loop through them all
+		Rectangle[] controls = GetTransformControls();
+		for (int i = 0; i < controls.Length; i++)
+		{
+			// Check for if we've hit a control
+			if (Raylib.CheckCollisionPointRec(mousePosition, controls[i]))
+			{
+				controlIndex = i;
+				return true;
+			}
+		}
+
+		// We didn't hit any controls
+		controlIndex = null;
+		return false;
 	}
 }
