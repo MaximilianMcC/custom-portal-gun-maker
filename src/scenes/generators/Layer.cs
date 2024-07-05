@@ -30,12 +30,12 @@ class LayerHandler
 		foreach (Layer layer in Layers)
 		{
 			// Check for if the mouse is over it
-			if (layer.MouseOnBody() || layer.MouseOnTransformControl(out _))
-			{
-				// Check for if the current layer is above the previously
-				// selected layer. We only want to select the highest layer
-				if (layer.Index > selectedLayerIndex) selectedLayerIndex = layer.Index;
-			}
+			//? Purposely decided to only use the body, not transform controls because you can't see them
+			if (!layer.MouseOnBody()) continue;
+
+			// Check for if the current layer is above the previously
+			// selected layer. We only want to select the highest layer
+			if (layer.Index > selectedLayerIndex) selectedLayerIndex = layer.Index;
 		}
 
 		// Select the layer
@@ -50,24 +50,21 @@ class LayerHandler
 
 		// Check for if the user is holding down on something
 		if (Raylib.IsMouseButtonDown(MouseButton.Left) == false) return;
-	}
 
-	// Check for if the user wants to move the currently selected layer
-	public void DragSelectedLayer()
-	{
+		// Get the selected layer
+		Layer selectedLayer = Layers[SelectedIndex];
 
-
-
-
-		// Check for if the user is holding down
-		// on the selected layer
-
-		// Get the distance that the mouse has moved
-		// since the last time we moved it and add
-		// it to the position of the layer so that
-		// it follows the mouse (dragging)
-		Vector2 offset = Raylib.GetMouseDelta();
-		Layers[SelectedIndex].Position += offset;
+		// If the user is holding down on the body then
+		// then want to drag the image around
+		if (selectedLayer.MouseOnBody())
+		{
+			// Get the distance that the mouse has moved
+			// since the last time we moved it and add
+			// it to the position of the layer so that
+			// it follows the mouse (dragging)
+			Vector2 offset = Raylib.GetMouseDelta();
+			selectedLayer.Position += offset;
+		}
 	}
 
 	// Check for if the user wants to resize the currently selected layer
