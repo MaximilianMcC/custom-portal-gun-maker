@@ -84,6 +84,9 @@ class Button
 			CleanUp();
 		}
 
+		// Set the cursor back to the default
+		Raylib.SetMouseCursor(MouseCursor.Default);
+
 		// Run the method
 		OnClick.Invoke();
 	}
