@@ -60,8 +60,8 @@ class LayerHandler
 			// Get the distance that the mouse has moved
 			// since the last time we moved it
 			Vector2 offset = Raylib.GetMouseDelta();
-			Vector2 scale;
 			Vector2 size = selectedLayer.GetSize();
+			Vector2 scale;
 
 			// Check for what transform control they're on
 			// and resize the image according to that. The resizing
@@ -116,7 +116,24 @@ class LayerHandler
 			// Return (only one action per frame please)
 			return;
 		}
-	
+	}
+
+	// Delete any needed layers
+	public void DeleteLayers()
+	{
+		// Check for if we press either the delete
+		// key, backspace, or x (blender users)
+		if (!(Raylib.IsKeyPressed(KeyboardKey.Delete) || Raylib.IsKeyPressed(KeyboardKey.Backspace) || Raylib.IsKeyPressed(KeyboardKey.X))) return;
+
+		// Delete the selected layer
+		Layers.Remove(Layers[SelectedIndex]);
+
+		// Get every index after/higher than the deleted
+		// layer and bring it back one
+		foreach (Layer layer in Layers)
+		{
+			if (layer.Index > SelectedIndex) layer.Index--;
+		}
 	}
 
 	// Draw the layers and include stuff like

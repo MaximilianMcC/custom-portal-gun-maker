@@ -23,6 +23,7 @@ class P1PortalgunGenerator : Scene
 
 		layerHandler.GetSelectedLayer();
 		layerHandler.TransformSelectedLayer();
+		layerHandler.DeleteLayers();
 
 
 		// If we press ctrl+n make a new layer
