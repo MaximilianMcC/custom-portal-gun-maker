@@ -30,8 +30,7 @@ class LayerHandler
 		foreach (Layer layer in Layers)
 		{
 			// Check for if the mouse is over it
-			//? Purposely decided to only use the body, not transform controls because you can't see them
-			if (!layer.MouseOnBody()) continue;
+			if (!(layer.MouseOnBody() || layer.MouseOnTransformControl(out _))) continue;
 
 			// Check for if the current layer is above the previously
 			// selected layer. We only want to select the highest layer
@@ -48,11 +47,60 @@ class LayerHandler
 		//! bad
 		if (SelectedIndex == -1) return;
 
-		// Check for if the user is holding down on something
+		// Check for if the user is holding down on something. If
+		// they are then exit early. Otherwise continue and get the 
+		// selected layer since we'll be using it a decent bit
 		if (Raylib.IsMouseButtonDown(MouseButton.Left) == false) return;
-
-		// Get the selected layer
 		Layer selectedLayer = Layers[SelectedIndex];
+
+		// If the user is holding down on a transform
+		// control then they want to resize the image
+		if (selectedLayer.MouseOnTransformControl(out int? controlIndex))
+		{
+			// Get the distance that the mouse has moved
+			// since the last time we moved it
+			Vector2 offset = Raylib.GetMouseDelta();
+			Vector2 scale;
+			Vector2 size = selectedLayer.GetSize();
+
+			// Check for what transform control they're on
+			// and resize the image according to that. The resizing
+			// works by getting the distance the transform control
+			// has moved, then turning that into a scale and adding
+			// it onto the original scale
+			switch (controlIndex)
+			{
+				// Top left
+				case 0:
+				    scale = -offset / size;
+					selectedLayer.Scale += scale;
+					selectedLayer.Position += offset;
+					break;
+
+				// Top right
+				case 1:
+					scale = new Vector2(offset.X, -offset.Y) / size;
+					selectedLayer.Scale += scale;
+					selectedLayer.Position.Y += offset.Y;
+					break;
+
+				// Bottom left
+				case 2:
+					scale = new Vector2(-offset.X, offset.Y) / size;
+					selectedLayer.Scale += scale;
+					selectedLayer.Position.X += offset.X;
+					break;
+
+				// Bottom right
+				case 3:
+					scale = offset / size;
+					selectedLayer.Scale += scale;
+					break;
+			}
+
+			// Return (only one action per frame please)
+			return;
+		}
 
 		// If the user is holding down on the body then
 		// then want to drag the image around
@@ -64,35 +112,11 @@ class LayerHandler
 			// it follows the mouse (dragging)
 			Vector2 offset = Raylib.GetMouseDelta();
 			selectedLayer.Position += offset;
+
+			// Return (only one action per frame please)
+			return;
 		}
-	}
-
-	// Check for if the user wants to resize the currently selected layer
-	public void ResizeSelectedLayer()
-	{
-		// TODO: Don't do this
-		//! bad
-		if (SelectedIndex == -1) return;
-
-		// Check for if the user is holding down on something
-		if (Raylib.IsMouseButtonDown(MouseButton.Left) == false) return;
-
-		// Check for if the user is holding down on one
-		// of the transform controls of the selected layer,
-		// and if so what one they are holding down on
-		// TODO: Use a bigger hitbox for the controls
-		Vector2 mousePosition = Raylib.GetMousePosition();
-		Rectangle[] transformControls = Layers[SelectedIndex].GetTransformControls();
-		if (Raylib.CheckCollisionPointRec(mousePosition, transformControls[0])) return;
-		if (Raylib.CheckCollisionPointRec(mousePosition, transformControls[1])) return;
-		if (Raylib.CheckCollisionPointRec(mousePosition, transformControls[2])) return;
-		if (Raylib.CheckCollisionPointRec(mousePosition, transformControls[3])) return;
-	}
-
-	// Check for if the user wants to rotate the currently selected layer
-	public void RotateSelectedLayer()
-	{
-
+	
 	}
 
 	// Draw the layers and include stuff like
@@ -106,7 +130,7 @@ class LayerHandler
 			// TODO: Don't reuse code
 			Raylib.DrawTexturePro(
 				layer.Texture,
-				new Rectangle(Vector2.Zero, new Vector2(layer.Texture.Width, layer.Texture.Height)),
+				new Rectangle(Vector2.Zero, layer.GetSize()),
 				layer.GetRectangle(),
 				Vector2.Zero,
 				layer.Rotation,
@@ -158,7 +182,7 @@ class LayerHandler
 			// TODO: Don't reuse code
 			Raylib.DrawTexturePro(
 				layer.Texture,
-				new Rectangle(Vector2.Zero, new Vector2(layer.Texture.Width, layer.Texture.Height)),
+				new Rectangle(Vector2.Zero, layer.GetSize()),
 				layer.GetRectangle(),
 				Vector2.Zero,
 				layer.Rotation,
@@ -189,6 +213,13 @@ class Layer
 	public Rectangle GetRectangle()
 	{
 		return new Rectangle(Position, new Vector2(Texture.Width, Texture.Height) * Scale);
+	}
+
+	// Get the original size of the layer
+	//! Does NOT come with scale applied
+	public Vector2 GetSize()
+	{
+		return new Vector2(Texture.Width, Texture.Height);
 	}
 
 	// Get the rectangles of all transform controls
@@ -230,6 +261,7 @@ class Layer
 
 	// Check for if the mouse is hovering over a
 	// transform control of this layer
+	// TODO: Could return an enum (top left, bottom right, etc) instead of controlIndex int
 	public bool MouseOnTransformControl(out int? controlIndex)
 	{
 		// Get the mouse position
