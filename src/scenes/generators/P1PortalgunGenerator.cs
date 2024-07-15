@@ -13,6 +13,7 @@ class P1PortalgunGenerator : Scene
 
 		// Load in the portalgun texture
 		portalGunTexture = Raylib.LoadTexture("./assets/game/p1gun/v_portalgun.png");
+
 	}
 
 	public override void Update()
@@ -49,6 +50,12 @@ class P1PortalgunGenerator : Scene
 			// Select the new layer
 			layerHandler.SelectedIndex = layer.Index;
 		}
+
+		// If we press ctrl+e then export
+		if (Raylib.IsKeyDown(KeyboardKey.LeftControl) && Raylib.IsKeyDown(KeyboardKey.E))
+		{
+			Generate();
+		}
 	}
 
 
@@ -63,11 +70,62 @@ class P1PortalgunGenerator : Scene
 	}
 
 
+	private void Generate()
+	{
+		// Generate the texture and save it to a temp
+		// directory somewhere
+		string texturePath = GenerateTexture();
+
+		// Turn the image into a vtf file
+		string textureFileName = "v_portalgun.vtf";
+		texturePath = ConvertToVtf(texturePath, textureFileName);
+
+		// Get the folders and whatnot
+		string steamGamesFolderPath = Program.SteamPath;
+		string portalFolder = Path.Join(steamGamesFolderPath, @"Portal\portal\");
+
+		// Make the file structure for the actual thing
+		string fullPath = Path.Join(portalFolder, @"custom\customPortalgun\materials\models\weapons\v_models\v_portalgun");
+		if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
+
+		// Put the vtf file in it
+		File.Move(texturePath, Path.Join(fullPath, textureFileName), true);
+	}
+
+	private string GenerateTexture()
+	{
+		// Make a new render texture canvas to
+		// draw the textures onto
+		RenderTexture2D canvas = Raylib.LoadRenderTexture(portalGunTexture.Width, portalGunTexture.Height);
+
+		// Draw the design onto the portalgun
+		Raylib.BeginTextureMode(canvas);
+		Raylib.DrawTexture(portalGunTexture, 0, 0, Color.White);
+		layerHandler.DrawLayers();
+		Raylib.EndTextureMode();
+
+		// Generate a temporary file path for the image
+		// to be stored before its converted into vtf
+		string filePath = Path.GetTempFileName();
+		filePath = filePath.Replace(".tmp", ".png");
+
+		// Turn the render texture into an
+		// image, flip it, then save it 
+		//? Flip it because OpenGL draws upside down
+		Image finalTexture = Raylib.LoadImageFromTexture(canvas.Texture);
+		Raylib.ImageFlipVertical(ref finalTexture);
+		Raylib.ExportImage(finalTexture, filePath);
+
+		// Return the path to the file
+		return filePath;
+	}
+
 
 	public override void CleanUp()
 	{
 		// Unload all the textures
 		Raylib.UnloadTexture(portalGunTexture);
+
 		layerHandler.CleanUp();
 	}
 }
